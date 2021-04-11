@@ -17,7 +17,7 @@ func (r *routers) Init() {
 	{ // 无需鉴权中间件
 		system.NewBaseGroup(public).Init()
 	}
-	private := g.Server().Group("").Middleware(internal.Middleware.JwtAuth, internal.Middleware.CasbinRbac)
+	private := g.Server().Group("/api").Middleware(internal.Middleware.JwtAuth, internal.Middleware.CasbinRbac)
 	{ // 需要Jwt鉴权, casbin鉴权
 		system.NewApiRouter(private).Init()
 		system.NewMenuRouter(private).Init()

@@ -70,7 +70,7 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 		r.Exit()
 	}
 	if !global.Config.System.UseMultipoint {
-		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000}, Message: "登录成功!"})
+		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000,"data":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 		r.Exit()
 	}
 	redisJwt, err := service.JwtBlacklist.GetRedisJWT(data.Uuid)
@@ -79,7 +79,7 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 			_ = r.Response.WriteJson(&response.Response{Code: 7, Error: err, Message: "设置登录状态失败!"})
 			r.Exit()
 		}
-		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000}, Message: "登录成功!"})
+		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000,"data":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 		r.Exit()
 	}
 	if err = service.JwtBlacklist.JwtToBlacklist(redisJwt); err != nil {
@@ -90,7 +90,7 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 		_ = r.Response.WriteJson(&response.Response{Code: 7, Error: err, Message: "设置登录状态失败!"})
 		r.Exit()
 	}
-	_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000}, Message: "登录成功!"})
+	_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000,"data":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 }
 
 //@author: [SliverHorn](https://github.com/SliverHorn)
@@ -145,9 +145,9 @@ func Authenticator(r *ghttp.Request) (interface{}, error) {
 		_ = r.Response.WriteJson(&response.Response{Code: 7, Error: err, Message: err.Error()})
 		r.Exit()
 	}
-	if !service.Store.Verify(info.CaptchaId, info.Captcha, true) { // 验证码校对
-		return nil, errors.New("验证码错误! ")
-	}
+	// if !service.Store.Verify(info.CaptchaId, info.Captcha, true) { // 验证码校对
+	// 	return nil, errors.New("验证码错误! ")
+	// }
 	if data, err := service.Admin.Login(&info); err != nil {
 		_ = r.Response.WriteJson(&response.Response{Code: 7, Error: err, Err: err.Error()})
 		r.ExitAll()

@@ -26,5 +26,6 @@ func (a *admin) Init() {
 		group.POST("getUserList", a.response.Handler()(api.Admin.GetList))           // 分页获取用户列表
 		group.POST("changePassword", a.response.Handler()(api.Admin.ChangePassword)) // 修改密码
 		group.POST("setUserAuthority", a.response.Handler()(api.Admin.SetAuthority)) // 设置用户权限
+		group.GET("currentuser", a.response.Handler()(api.Admin.CurrentUser)) // 当前用户信息
 	}
 }

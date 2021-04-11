@@ -83,6 +83,29 @@ func (a *admin) FindAdminById(info *request.GetById) (result *model.Admin, err e
 }
 
 //@author: [SliverHorn](https://github.com/SliverHorn)
+//@description: 用于获得当前用户信息，根据uuid返回admin信息
+func (a *admin) FindAdmininfo(info *request.GetByUuid) (result *model.Admin, err error) {
+	var entity model.Admin
+	// var authentity model.Authority
+	var db = g.DB().Table(a._admin.TableName()).Safe()
+	err = db.Where(g.Map{"uuid": info.Uuid}).Struct(&entity)
+	if err !=nil{
+		return 
+	}
+	
+	entity.Authority = internal.Authority().First(entity.AuthorityId)
+	glog.Debug(entity)
+
+
+
+	return &entity, err
+}
+
+
+
+
+
+//@author: [SliverHorn](https://github.com/SliverHorn)
 //@description: 设置用户权限
 func (a *admin) SetUserAuthority(info *request.SetAuthority) error {
 	_, err := g.DB().Table(a._admin.TableName()).Update(g.Map{"authority_id": info.AuthorityId}, g.Map{"uuid": info.Uuid})

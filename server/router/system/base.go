@@ -17,9 +17,9 @@ func NewBaseGroup(router *ghttp.RouterGroup) interfaces.Router {
 }
 
 func (b *base) Init() {
-	group := b.router.Group("/base")
+	group := b.router.Group("/api")
 	{
-		group.POST("captcha", b.response.Handler()(api.Base.Captcha))
-		group.POST("login", api.GfJWTMiddleware.LoginHandler) // 登录
+		group.POST("/account/captcha", b.response.Handler()(api.Base.Captcha))
+		group.POST("/account/login", api.GfJWTMiddleware.LoginHandler) // 登录
 	}
 }

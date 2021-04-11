@@ -132,3 +132,21 @@ func (a *admin) Update(r *ghttp.Request) *response.Response {
 		return &response.Response{Data: g.Map{"userInfo": data}, MessageCode: response.SuccessSetAdminInfo}
 	}
 }
+
+
+//获得当前用户
+//
+
+func (a *admin) CurrentUser(r *ghttp.Request) *response.Response {
+	
+	token, _ := GfJWTMiddleware.ParseToken(r); 
+
+	claims := gconv.Map(token.Claims)
+	uuid := gconv.String(claims["admin_uuid"])
+	
+	data, _ := service.Admin.FindAdmininfo(&request.GetByUuid{Uuid: uuid});
+	glog.Debug(data)
+	return &response.Response{Data: data}	
+
+	
+}
