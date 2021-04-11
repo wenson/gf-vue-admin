@@ -1,16 +1,16 @@
 package api
 
 import (
-	"errors"
-	"gf-vue-admin/library/response"
 	model "gf-vue-admin/app/model/system"
 	"gf-vue-admin/app/model/system/request"
 	service "gf-vue-admin/app/service/system"
 	"gf-vue-admin/library/global"
-	"github.com/gogf/gf-jwt"
+	"gf-vue-admin/library/response"
+	"time"
+
+	jwt "github.com/gogf/gf-jwt"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
-	"time"
 )
 
 var GfJWTMiddleware *jwt.GfJWTMiddleware
@@ -70,7 +70,7 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 		r.Exit()
 	}
 	if !global.Config.System.UseMultipoint {
-		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000,"data":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
+		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{ "token": token, "expiresAt": expire.Unix() * 1000,"user":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 		r.Exit()
 	}
 	redisJwt, err := service.JwtBlacklist.GetRedisJWT(data.Uuid)
@@ -79,7 +79,7 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 			_ = r.Response.WriteJson(&response.Response{Code: 7, Error: err, Message: "设置登录状态失败!"})
 			r.Exit()
 		}
-		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000,"data":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
+		_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{ "token": token, "expiresAt": expire.Unix() * 1000,"user":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 		r.Exit()
 	}
 	if err = service.JwtBlacklist.JwtToBlacklist(redisJwt); err != nil {
@@ -90,7 +90,7 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 		_ = r.Response.WriteJson(&response.Response{Code: 7, Error: err, Message: "设置登录状态失败!"})
 		r.Exit()
 	}
-	_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{"user": data, "token": token, "expiresAt": expire.Unix() * 1000,"data":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
+	_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{ "token": token, "expiresAt": expire.Unix() * 1000,"user":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 }
 
 //@author: [SliverHorn](https://github.com/SliverHorn)
