@@ -2,20 +2,21 @@ package internal
 
 import (
 	"bytes"
-	"gf-vue-admin/library/response"
 	api "gf-vue-admin/app/api/system"
 	model "gf-vue-admin/app/model/system"
 	"gf-vue-admin/app/model/system/request"
 	service "gf-vue-admin/app/service/system"
 	"gf-vue-admin/library/global"
+	"gf-vue-admin/library/response"
 	"gf-vue-admin/library/utils"
+	"io/ioutil"
+	"strconv"
+	"time"
+
 	jwt "github.com/gogf/gf-jwt"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
 	"github.com/gogf/gf/util/gconv"
-	"io/ioutil"
-	"strconv"
-	"time"
 )
 
 var Middleware = new(middleware)
@@ -30,8 +31,8 @@ type middleware struct {
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@description: 验证token有效性
 func (m *middleware) JwtAuth(r *ghttp.Request) {
-	api.GfJWTMiddleware.MiddlewareFunc()(r)
-	_jwt, err := api.GfJWTMiddleware.ParseToken(r) // 解析token
+	api.Auth.MiddlewareFunc()(r)
+	_jwt, err := api.Auth.ParseToken(r) // 解析token
 	if err != nil {
 		if err == jwt.ErrExpiredToken {
 			_ = r.Response.WriteJson(&response.Response{Code: 7, Data: g.Map{"reload": true}, Message: "授权已过期!"})
@@ -91,7 +92,7 @@ func (m *middleware) OperationRecord(r *ghttp.Request) {
 
 	r.Request.Body = ioutil.NopCloser(bytes.NewBuffer(m.body))
 
-	if token, err := api.GfJWTMiddleware.ParseToken(r); err != nil { // 优先从jwt获取用户信息
+	if token, err := api.Auth.ParseToken(r); err != nil { // 优先从jwt获取用户信息
 		id, _ := strconv.Atoi(r.Request.Header.Get("x-user-id"))
 		if m.result, m.err = service.Admin.FindAdminById(&request.GetById{Id: uint(id)}); m.err != nil {
 			g.Log().Error(`Function service.Admin.FindAdminById() Failed!`, g.Map{"err": m.err})

@@ -142,7 +142,7 @@ func (a *admin) Update(r *ghttp.Request) *response.Response {
 
 func (a *admin) CurrentUser(r *ghttp.Request) *response.Response {
 	
-	token, _ := GfJWTMiddleware.ParseToken(r); 
+	token, _ := Auth.ParseToken(r); 
 
 	claims := gconv.Map(token.Claims)
 	uuid := gconv.String(claims["admin_uuid"])

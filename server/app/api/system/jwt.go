@@ -11,12 +11,16 @@ import (
 	jwt "github.com/gogf/gf-jwt"
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
+	"github.com/gogf/gf/os/glog"
 )
 
-var GfJWTMiddleware *jwt.GfJWTMiddleware
+var (
+	// The underlying JWT middleware.
+	Auth *jwt.GfJWTMiddleware
+)
 
 func init() {
-	GfJWTMiddleware, _ = jwt.New(&jwt.GfJWTMiddleware{
+	authMiddleware,err := jwt.New(&jwt.GfJWTMiddleware{
 		Realm:           global.Config.Jwt.SigningKey,
 		Key:             []byte(global.Config.Jwt.SigningKey),
 		Timeout:         time.Duration(global.Config.Jwt.ExpiresAt) * time.Hour * 24,
@@ -27,11 +31,16 @@ func init() {
 		TimeFunc:        time.Now,
 		Authenticator:   Authenticator,
 		LoginResponse:   LoginResponse,
+		LogoutResponse:  LogoutResponse,
 		RefreshResponse: RefreshResponse,
 		Unauthorized:    Unauthorized,
 		IdentityHandler: IdentityHandler,
 		PayloadFunc:     PayloadFunc,
 	})
+	if err != nil {
+		glog.Fatal("JWT Error:" + err.Error())
+	}
+	Auth = authMiddleware
 }
 
 func PayloadFunc(data interface{}) jwt.MapClaims {
@@ -49,7 +58,7 @@ func PayloadFunc(data interface{}) jwt.MapClaims {
 //@description: 设置JWT的身份。
 func IdentityHandler(r *ghttp.Request) interface{} {
 	claims := jwt.ExtractClaims(r)
-	return claims[GfJWTMiddleware.IdentityKey]
+	return claims[Auth.IdentityKey]
 }
 
 //@author: [SliverHorn](https://github.com/SliverHorn)
@@ -93,6 +102,16 @@ func LoginResponse(r *ghttp.Request, code int, token string, expire time.Time) {
 	_ = r.Response.WriteJson(&response.Response{Code: 0, Data: g.Map{ "token": token, "expiresAt": expire.Unix() * 1000,"user":g.Map{"currentAuthority":data.AuthorityId,"status":"ok","type":"account"}}, Message: "登录成功!"})
 }
 
+
+//登出
+func LogoutResponse(r *ghttp.Request, code int) {
+
+	_ = r.Response.WriteJson(&response.Response{Code: code, Message: "登录失败!"})
+	r.ExitAll()
+}
+
+
+
 //@author: [SliverHorn](https://github.com/SliverHorn)
 //@description: 用于获取新令牌，无论当前令牌是否过期。
 func RefreshResponse(r *ghttp.Request, code int, token string, expire time.Time) {
@@ -100,7 +119,7 @@ func RefreshResponse(r *ghttp.Request, code int, token string, expire time.Time)
 	//	global.Result(r, global.ERROR, g.Map{"reload": true}, "您的帐户异地登陆或令牌失效")
 	//	r.ExitAll()
 	//}
-	//Token, err := GfJWTMiddleware.ParseToken(r) // 解析token
+	//Token, err := Auth.ParseToken(r) // 解析token
 	//if err != nil {
 	//	global.FailWithMessage(r, "Token不正确,更新失败")
 	//	r.Exit()

@@ -1,9 +1,10 @@
 package router
 
 import (
-	"gf-vue-admin/library/response"
 	api "gf-vue-admin/app/api/system"
 	"gf-vue-admin/interfaces"
+	"gf-vue-admin/library/response"
+
 	"github.com/gogf/gf/net/ghttp"
 )
 
@@ -20,6 +21,7 @@ func (b *base) Init() {
 	group := b.router.Group("/api")
 	{
 		group.POST("/account/captcha", b.response.Handler()(api.Base.Captcha))
-		group.POST("/account/login", api.GfJWTMiddleware.LoginHandler) // 登录
+		group.POST("/account/login", api.Auth.LoginHandler) // 登录
+		group.GET("/account/logout", api.Auth.LogoutHandler) // 登出
 	}
 }
